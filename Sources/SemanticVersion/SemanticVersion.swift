@@ -11,7 +11,7 @@ public struct SemanticVersion: Comparable, Codable {
     public let minor: UInt
     public let patch: UInt
 
-    init(major: UInt, minor: UInt = 0, patch: UInt = 0) {
+    public init(major: UInt, minor: UInt = 0, patch: UInt = 0) {
         self.major = major
         self.minor = minor
         self.patch = patch
