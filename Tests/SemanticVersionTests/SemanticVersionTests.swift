@@ -9,6 +9,15 @@ final class SemanticVersionTests: XCTestCase {
         XCTAssertEqual(sv.description, "0.3.0")
         sv = SemanticVersion(major: 10, minor: 3, patch: 87)
         XCTAssertEqual(sv.description, "10.3.87")
+    }
+    
+    func testInitString() throws {
+        var sv = try XCTUnwrap(SemanticVersion("6"))
+        XCTAssertEqual(sv.description, "6.0.0")
+        sv = try XCTUnwrap(SemanticVersion("0.3"))
+        XCTAssertEqual(sv.description, "0.3.0")
+        sv = try XCTUnwrap(SemanticVersion("10.3.87"))
+        XCTAssertEqual(sv.description, "10.3.87")
 
         XCTAssertNil(SemanticVersion(""))
         XCTAssertNil(SemanticVersion("1."))
@@ -18,15 +27,59 @@ final class SemanticVersionTests: XCTestCase {
         XCTAssertNil(SemanticVersion("..."))
         XCTAssertNil(SemanticVersion("."))
 
-        XCTAssertEqual(SemanticVersion("1.0.0")?.description, "1.0.0")
-        XCTAssertEqual(SemanticVersion("0.0.0")?.description, "0.0.0")
-        XCTAssertEqual(SemanticVersion("1.2.0")?.description, "1.2.0")
-        XCTAssertEqual(SemanticVersion("1")?.description, "1.0.0")
-        XCTAssertEqual(SemanticVersion("1.2")?.description, "1.2.0")
-        XCTAssertEqual(SemanticVersion("1.2.3")?.description, "1.2.3")
+        XCTAssertEqual(try XCTUnwrap(SemanticVersion("1.0.0")).description, "1.0.0")
+        XCTAssertEqual(try XCTUnwrap(SemanticVersion("0.0.0")).description, "0.0.0")
+        XCTAssertEqual(try XCTUnwrap(SemanticVersion("1.2.0")).description, "1.2.0")
+        XCTAssertEqual(try XCTUnwrap(SemanticVersion("1")).description, "1.0.0")
+        XCTAssertEqual(try XCTUnwrap(SemanticVersion("1.2")).description, "1.2.0")
+        XCTAssertEqual(try XCTUnwrap(SemanticVersion("1.2.3")).description, "1.2.3")
 
-        XCTAssertEqual(SemanticVersion("1.2.3")?.majorString, "1")
-        XCTAssertEqual(SemanticVersion("1.2.3")?.minorString, "1.2")
+        XCTAssertEqual(try XCTUnwrap(SemanticVersion("1.2.3")).majorString, "1")
+        XCTAssertEqual(try XCTUnwrap(SemanticVersion("1.2.3")).minorString, "1.2")
+    }
+    
+    func testInitPreRelease() throws {
+        var sv = try XCTUnwrap(SemanticVersion(major: 1, minor: 0, patch: 0, preRelease: ["alpha"]))
+        XCTAssertEqual(sv.description, "1.0.0-alpha")            
+        sv = try XCTUnwrap(SemanticVersion(major: 1, minor: 0, patch: 0, preRelease: ["alpha", "1"]))
+        XCTAssertEqual(sv.description, "1.0.0-alpha.1")            
+        sv = try XCTUnwrap(SemanticVersion(major: 1, minor: 0, patch: 0, preRelease: ["0","3","7"]))
+        XCTAssertEqual(sv.description, "1.0.0-0.3.7")            
+        sv = try XCTUnwrap(SemanticVersion(major: 1, minor: 0, patch: 0, preRelease: ["x","7","z","92"]))
+        XCTAssertEqual(sv.description, "1.0.0-x.7.z.92")            
+
+        XCTAssertNil(SemanticVersion(major: 1, minor: 0, patch: 0, preRelease: ["alpha&"]))
+        XCTAssertNil(SemanticVersion(major: 1, minor: 0, patch: 0, preRelease: ["0alpha"]))
+    }
+
+    func testInitPreReleaseString() throws {
+        XCTAssertNil(SemanticVersion("1.0.0-"))
+        
+        var sv = try XCTUnwrap(SemanticVersion("1.0.0-alpha"))
+        XCTAssertEqual(sv.description, "1.0.0-alpha")            
+        sv = try XCTUnwrap(SemanticVersion("1.0.0-alpha.1"))
+        XCTAssertEqual(sv.description, "1.0.0-alpha.1")            
+        sv = try XCTUnwrap(SemanticVersion("1.0.0-0.3.7"))
+        XCTAssertEqual(sv.description, "1.0.0-0.3.7")            
+        sv = try XCTUnwrap(SemanticVersion("1.0.0-x.7.z.92"))
+        XCTAssertEqual(sv.description, "1.0.0-x.7.z.92") 
+        sv = try XCTUnwrap(SemanticVersion("1.0.0-x-y-z.–"))
+        XCTAssertEqual(sv.description, "1.0.0-x-y-z.–")     
+    }
+    
+    func testCodable() throws {
+        do {
+            let sv = SemanticVersion(major: 10, minor: 3, patch: 87)
+            let data = try JSONEncoder().encode(sv)
+            let sv2 = try JSONDecoder().decode(SemanticVersion.self, from: data)
+            XCTAssertEqual(sv, sv2)
+        }
+        do {
+            let sv = SemanticVersion(major: 1, minor: 0, patch: 0, preRelease: ["alpha"])
+            let data = try JSONEncoder().encode(sv)
+            let sv2 = try JSONDecoder().decode(SemanticVersion.self, from: data)
+            XCTAssertEqual(sv, sv2)
+        }
     }
 
     func testCompare() {
