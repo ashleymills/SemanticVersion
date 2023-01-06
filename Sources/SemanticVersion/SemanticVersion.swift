@@ -28,7 +28,7 @@ public struct SemanticVersion: Comparable, Codable {
         
         let allowedIdentifierCharacterSet = CharacterSet.alphanumerics.union(CharacterSet(arrayLiteral: "-"))
         
-        if let preRelease = preRelease {
+        if let preRelease {
             for component in preRelease {
                 if let _ = component.rangeOfCharacter(from: allowedIdentifierCharacterSet.inverted) { // Must contain only alphanumerics
                     return nil
@@ -40,7 +40,7 @@ public struct SemanticVersion: Comparable, Codable {
         } 
         self.preRelease = preRelease 
 
-        if let build = build {
+        if let build {
             for component in build {
                 if let _ = component.rangeOfCharacter(from: allowedIdentifierCharacterSet.inverted) { // Must contain only alphanumerics
                     return nil
@@ -106,7 +106,7 @@ public extension SemanticVersion {
 
         guard values.count == components.count else { return nil }
 
-        if let preRelease = preRelease {
+        if let preRelease {
             let preRelease = preRelease.components(separatedBy: ".")
             let build = build?.components(separatedBy: ".") 
             self.init(major: values[0], minor: values[1], patch: values[2], preRelease: preRelease, build: build)
@@ -140,7 +140,7 @@ extension SemanticVersion: CustomStringConvertible {
     public var description: String {
         var version = "\(major).\(minor).\(patch)"
         
-        if let preRelease = preRelease {
+        if let preRelease {
             version.append("-" + preRelease.joined(separator: "."))
         }
         if let preRelease = build {
