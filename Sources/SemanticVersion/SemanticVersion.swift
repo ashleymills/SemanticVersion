@@ -1,6 +1,6 @@
 import Foundation
 
-public struct SemanticVersion: Comparable, Codable {
+public struct SemanticVersion: Comparable, Codable, Sendable {
     public static func < (lhs: SemanticVersion, rhs: SemanticVersion) -> Bool {
         return lhs.major < rhs.major ||
             (lhs.major == rhs.major && lhs.minor < rhs.minor) ||
